@@ -79,6 +79,11 @@ async function book(page, classData)
         throw new Error("can't find dialog book button");
     }
 
+    if (await button2.evaluate(i => i.disabled))
+    {
+        throw new Error("dialog book button is disabled, maybe booking too early");
+    }
+
     await button2.click();
     await wait(page);
 }
