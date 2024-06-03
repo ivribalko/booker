@@ -17,7 +17,7 @@ import { URL, LOGIN, PASSWORD, CLASSES } from './secret.js';
         await book(page, classes);
         await browser.close();
 
-        await sendSuccess(`${DAYS[classes.day]} booked: ${JSON.stringify(classes)}`);
+        await sendSuccess(`${classes.type} at ${classes.time} on ${DAYS[classes.day]} booked!`);
     }
     catch (e)
     {
