@@ -11,13 +11,18 @@ import { URL, LOGIN, PASSWORD, CLASSES } from './secret.js';
         let browser = await launch();
         let page = await browser.newPage();
 
-        await page.goto(URL, { waitUntil: 'networkidle2' });
-        await auth(page);
-        await wait(page);
-        await book(page, classes);
-        await browser.close();
-
-        await sendSuccess(`${classes.type} at ${classes.time} on ${DAYS[classes.day]} booked!`);
+        try
+        {
+            await page.goto(URL, { waitUntil: 'networkidle2' });
+            await auth(page);
+            await wait(page);
+            await book(page, classes);
+            await sendSuccess(`${classes.type} at ${classes.time} on ${DAYS[classes.day]} booked!`);
+        }
+        finally
+        {
+            await browser.close();
+        }
     }
     catch (e)
     {
