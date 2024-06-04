@@ -8,7 +8,11 @@ import { URL, LOGIN, PASSWORD, CLASSES } from './secret.js';
     try
     {
         let classes = getClassData();
-        let browser = await launch();
+        let browser = await launch({
+            headless: true,
+            executablePath: '/usr/bin/chromium',
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
         let page = await browser.newPage();
 
         try
@@ -45,7 +49,7 @@ async function auth(page)
  */
 async function wait(page)
 {
-    await page.waitForNetworkIdle({ idleTime: 3000, timeout: 13000 });
+    await new Promise(resolve => setTimeout(resolve, 30000));
 }
 
 /**
