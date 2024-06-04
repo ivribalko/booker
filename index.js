@@ -2,17 +2,49 @@ import { Page, launch } from 'puppeteer';
 import { sendFailure, sendSuccess } from './bot.js';
 import { DAYS } from './days.js';
 import { URL, LOGIN, PASSWORD, CLASSES } from './secret.js';
+import * as cron from 'node-cron';
 
-(async () =>
+CLASSES.forEach(data =>
+{
+    cron.schedule(getCronSchedule(data),
+        () =>
+        {
+            auth_and_book(data);
+        },
+        {
+            timezone: "America/New_York"
+        });
+});
+
+/**
+ * @return String 
+ */
+function getCronSchedule(data)
+{
+    let time = data.time.substring(0, 7);
+    let hour = Number(time.substring(0, 1));
+    if (time.includes('pm'))
+    {
+        hour += 12;
+    }
+    let minute = Number(time.substring(2, 4));
+    // both cron and DAYS are 0 based starting Sunday
+    // -2 is two days before; +7 to avoid negative 
+    let day = (data.day - 2 + 7) % 7;
+    // + 1 minute to get into 48 hours window
+    return `${minute + 1} ${hour} * * ${day}`;
+}
+
+async function auth_and_book(classes)
 {
     try
     {
-        let classes = getClassData();
         let browser = await launch({
             headless: true,
             executablePath: '/usr/bin/chromium',
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
+
         let page = await browser.newPage();
 
         try
@@ -32,7 +64,7 @@ import { URL, LOGIN, PASSWORD, CLASSES } from './secret.js';
     {
         await sendFailure(`${e}`);
     }
-})();
+}
 
 /**
  * @param {Page} page
@@ -95,17 +127,4 @@ async function book(page, classData)
 
     await button2.click();
     await wait(page);
-}
-
-function getClassData()
-{
-    let afterTomorrow = (new Date().getDay() + 2) % DAYS.length
-    let classData = CLASSES.find(i => i.day == afterTomorrow);
-
-    if (classData == null)
-    {
-        throw new Error("you have no classes to book for the day after tomorrow");
-    }
-
-    return classData;
 }
