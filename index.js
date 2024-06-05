@@ -51,7 +51,7 @@ async function auth_and_book(classes)
         {
             await page.goto(URL, { waitUntil: 'networkidle2' });
             await auth(page);
-            await wait(page);
+            await wait();
             await book(page, classes);
             await sendSuccess(`${classes.type} at ${classes.time} on ${DAYS[classes.day]} booked!`);
         }
@@ -76,11 +76,9 @@ async function auth(page)
     await page.click('#b_logon');
 }
 
-/**
- * @param {Page} page
- */
-async function wait(page)
+async function wait()
 {
+    // page.waitForNetworkIdle always times out inside docker
     await new Promise(resolve => setTimeout(resolve, 30000));
 }
 
@@ -112,7 +110,7 @@ async function book(page, classData)
     }
 
     await button1.click();
-    await wait(page);
+    await wait();
 
     let button2 = await page.$('div.classDialog__messageArea > button');
     if (button2 == null)
@@ -126,5 +124,5 @@ async function book(page, classData)
     }
 
     await button2.click();
-    await wait(page);
+    await wait();
 }
